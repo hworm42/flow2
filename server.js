@@ -1,118 +1,36 @@
 const express = require('express');
-    const User = require('./models/User');
-    const Flow = require('./models/Flow');
-    const Reply = require('./models/Reply');
-    const DirectMessage = require('./models/DirectMessage');
-    const Notification = require('./models/Notification');
+    const userController = require('./controllers/userController');
+    const flowController = require('./controllers/flowController');
+    const replyController = require('./controllers/replyController');
+    const directMessageController = require('./controllers/directMessageController');
+    const notificationController = require('./controllers/notificationController');
     const app = express();
     const port = 3000;
 
     app.use(express.json());
 
-    app.get('/api/users', (req, res) => {
-      User.find({}, (err, docs) => {
-        if (err) {
-          res.status(500).send(err);
-        } else {
-          res.json(docs);
-        }
-      });
-    });
+    app.post('/register', userController.registerUser);
+    app.post('/login', userController.loginUser);
+    app.put('/user/:id', userController.updateUser);
+    app.get('/user/:id', userController.getUser);
+    app.delete('/user/:id', userController.deleteUser);
 
-    app.post('/api/users', (req, res) => {
-      const user = req.body;
-      User.insert(user, (err, newDoc) => {
-        if (err) {
-          res.status(500).send(err);
-        } else {
-          res.status(201).json(newDoc);
-        }
-      });
-    });
+    app.post('/flow', flowController.createFlow);
+    app.get('/flow/:id', flowController.getFlow);
+    app.get('/flows/:userId', flowController.getUserFlows);
+    app.delete('/flow/:id', flowController.deleteFlow);
+    app.put('/flow/:id', flowController.updateFlow);
 
-    app.get('/api/flows', (req, res) => {
-      Flow.find({}, (err, docs) => {
-        if (err) {
-          res.status(500).send(err);
-        } else {
-          res.json(docs);
-        }
-      });
-    });
+    app.post('/reply', replyController.createReply);
+    app.get('/replies/:flowId', replyController.getReplies);
 
-    app.post('/api/flows', (req, res) => {
-      const flow = req.body;
-      Flow.insert(flow, (err, newDoc) => {
-        if (err) {
-          res.status(500).send(err);
-        } else {
-          res.status(201).json(newDoc);
-        }
-      });
-    });
+    app.post('/message', directMessageController.sendMessage);
+    app.get('/messages/:userId', directMessageController.getMessages);
+    app.delete('/message/:id', directMessageController.deleteMessage);
 
-    app.get('/api/replies', (req, res) => {
-      Reply.find({}, (err, docs) => {
-        if (err) {
-          res.status(500).send(err);
-        } else {
-          res.json(docs);
-        }
-      });
-    });
-
-    app.post('/api/replies', (req, res) => {
-      const reply = req.body;
-      Reply.insert(reply, (err, newDoc) => {
-        if (err) {
-          res.status(500).send(err);
-        } else {
-          res.status(201).json(newDoc);
-        }
-      });
-    });
-
-    app.get('/api/direct-messages', (req, res) => {
-      DirectMessage.find({}, (err, docs) => {
-        if (err) {
-          res.status(500).send(err);
-        } else {
-          res.json(docs);
-        }
-      });
-    });
-
-    app.post('/api/direct-messages', (req, res) => {
-      const directMessage = req.body;
-      DirectMessage.insert(directMessage, (err, newDoc) => {
-        if (err) {
-          res.status(500).send(err);
-        } else {
-          res.status(201).json(newDoc);
-        }
-      });
-    });
-
-    app.get('/api/notifications', (req, res) => {
-      Notification.find({}, (err, docs) => {
-        if (err) {
-          res.status(500).send(err);
-        } else {
-          res.json(docs);
-        }
-      });
-    });
-
-    app.post('/api/notifications', (req, res) => {
-      const notification = req.body;
-      Notification.insert(notification, (err, newDoc) => {
-        if (err) {
-          res.status(500).send(err);
-        } else {
-          res.status(201).json(newDoc);
-        }
-      });
-    });
+    app.post('/notification', notificationController.createNotification);
+    app.get('/notifications/:userId', notificationController.getNotifications);
+    app.put('/notification/:id', notificationController.readNotification);
 
     app.listen(port, () => {
       console.log(`Server running at http://localhost:${port}`);
