@@ -1,24 +1,34 @@
 const Reply = require('../models/Reply');
 
+    const checkRole = (user, requiredRole) => {
+      return user.role === requiredRole;
+    };
+
     exports.createReply = (req, res) => {
       const { flowId, userId, content, media, mentions } = req.body;
-      const newReply = {
-        flowId,
-        userId,
-        content,
-        media,
-        mentions,
-        createdAt: new Date(),
-        likes: 0
-      };
+      const user = req.user;
 
-      Reply.insert(newReply, (err, newDoc) => {
-        if (err) {
-          res.status(500).send(err);
-        } else {
-          res.status(201).json(newDoc);
-        }
-      });
+      if (checkRole(user, 'User') || checkRole(user, 'Moderator') || checkRole(user, 'Admin') || checkRole(user, 'Superadmin')) {
+        const newReply = {
+          flowId,
+          userId,
+          content,
+          media,
+          mentions,
+          createdAt: new Date(),
+          likes: 0
+        };
+
+        Reply.insert(newReply, (err, newDoc) => {
+          if (err) {
+            res.status(500).send(err);
+          } else {
+            res.status(201).json(newDoc);
+          }
+        });
+      } else {
+        res.status(403).send('Forbidden');
+      }
     };
 
     exports.getReplies = (req, res) => {

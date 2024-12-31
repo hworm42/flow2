@@ -1,49 +1,79 @@
 const Notification = require('../models/Notification');
 
+    const checkRole = (user, requiredRole) => {
+      return user.role === requiredRole;
+    };
+
     exports.createNotification = (req, res) => {
       const { userId, type, sourceId, content } = req.body;
-      const newNotification = {
-        userId,
-        type,
-        sourceId,
-        content,
-        createdAt: new Date(),
-        read: false
-      };
+      const user = req.user;
 
-      Notification.insert(newNotification, (err, newDoc) => {
-        if (err) {
-          res.status(500).send(err);
-        } else {
-          res.status(201).json(newDoc);
-        }
-      });
+      if (checkRole(user, 'Admin') || checkRole(user, 'Superadmin')) {
+        const newNotification = {
+          userId,
+          type,
+          sourceId,
+          content,
+          createdAt: new Date(),
+          read: false
+        };
+
+        Notification.insert(newNotification, (err, newDoc) => {
+          if (err) {
+            res.status(500).send(err);
+          } else {
+            res.status(201).json(newDoc);
+          }
+        });
+      } else {
+        res.status(403).send('Forbidden');
+      }
     };
 
     exports.getNotifications = (req, res) => {
       const { userId } = req.params;
-      Notification.find({ userId }, (err, notifications) => {
-        if (err) {
-          res.status(500).send(err);
-        } else {
-          res.status(200).json(notifications);
-        }
-      });
+      const user = req.user;
+
+      if (user._id === userId || checkRole(user, 'Moderator') || checkRole(user, 'Admin') || checkRole(user, 'Superadmin')) {
+        Notification.find({ userId }, (err, notifications) => {
+          if (err) {
+            res.status(500).send(err);
+          } else {
+            res.status(200).json(notifications);
+          }
+        });
+      } else {
+        res.status(403).send('Forbidden');
+      }
     };
 
     exports.readNotification = (req, res) => {
       const { id } = req.params;
-      Notification.update({ _id: id }, { $set: { read: true } }, {}, (err, numReplaced) => {
+      const user = req.user;
+
+      Notification.findOne({ _id: id }, (err, notification) => {
         if (err) {
           res.status(500).send(err);
-        } else if (numReplaced) {
-          Notification.findOne({ _id: id }, (err, notification) => {
-            if (err) {
-              res.status(500).send(err);
-            } else {
-              res.status(200).json(notification);
-            }
-          });
+        } else if (notification) {
+          if (notification.userId === user._id || checkRole(user, 'Moderator') || checkRole(user, 'Admin') || checkRole(user, 'Superadmin')) {
+            Notification.update({ _id: id }, { $set: { read: true } }, {}, (err, numReplaced) => {
+              if (err) {
+                res.status(500).send(err);
+              } else if (numReplaced) {
+                Notification.findOne({ _id: id }, (err, notification) => {
+                  if (err) {
+                    res.status(500).send(err);
+                  } else {
+                    res.status(200).json(notification);
+                  }
+                });
+              } else {
+                res.status(404).send('Notification not found');
+              }
+            });
+          } else {
+            res.status(403).send('Forbidden');
+          }
         } else {
           res.status(404).send('Notification not found');
         }

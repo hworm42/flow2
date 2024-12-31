@@ -14,6 +14,7 @@ const express = require('express');
     app.put('/user/:id', userController.updateUser);
     app.get('/user/:id', userController.getUser);
     app.delete('/user/:id', userController.deleteUser);
+    app.post('/user/assign-role', userController.assignRole);
 
     app.post('/flow', flowController.createFlow);
     app.get('/flow/:id', flowController.getFlow);
