@@ -4,6 +4,8 @@ const express = require('express');
     const replyController = require('./controllers/replyController');
     const directMessageController = require('./controllers/directMessageController');
     const notificationController = require('./controllers/notificationController');
+    const banController = require('./controllers/banController');
+    const flowReportController = require('./controllers/flowReportController');
     const app = express();
     const port = 3000;
 
@@ -21,6 +23,7 @@ const express = require('express');
     app.get('/flows/:userId', flowController.getUserFlows);
     app.delete('/flow/:id', flowController.deleteFlow);
     app.put('/flow/:id', flowController.updateFlow);
+    app.post('/flow/report', flowController.reportFlow);
 
     app.post('/reply', replyController.createReply);
     app.get('/replies/:flowId', replyController.getReplies);
@@ -32,6 +35,13 @@ const express = require('express');
     app.post('/notification', notificationController.createNotification);
     app.get('/notifications/:userId', notificationController.getNotifications);
     app.put('/notification/:id', notificationController.readNotification);
+
+    app.post('/ban', banController.createBan);
+    app.get('/bans', banController.getBans);
+    app.delete('/ban/:id', banController.removeBan);
+
+    app.get('/reports', flowReportController.getReports);
+    app.put('/report/:id', flowReportController.reviewReport);
 
     app.listen(port, () => {
       console.log(`Server running at http://localhost:${port}`);

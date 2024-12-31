@@ -1,4 +1,5 @@
 const Notification = require('../models/Notification');
+    const SystemNotifications = require('../models/SystemNotifications');
 
     const checkRole = (user, requiredRole) => {
       return user.role === requiredRole;
@@ -35,7 +36,7 @@ const Notification = require('../models/Notification');
       const user = req.user;
 
       if (user._id === userId || checkRole(user, 'Moderator') || checkRole(user, 'Admin') || checkRole(user, 'Superadmin')) {
-        Notification.find({ userId }, (err, notifications) => {
+        SystemNotifications.find({ userId }, (err, notifications) => {
           if (err) {
             res.status(500).send(err);
           } else {
@@ -51,16 +52,16 @@ const Notification = require('../models/Notification');
       const { id } = req.params;
       const user = req.user;
 
-      Notification.findOne({ _id: id }, (err, notification) => {
+      SystemNotifications.findOne({ _id: id }, (err, notification) => {
         if (err) {
           res.status(500).send(err);
         } else if (notification) {
           if (notification.userId === user._id || checkRole(user, 'Moderator') || checkRole(user, 'Admin') || checkRole(user, 'Superadmin')) {
-            Notification.update({ _id: id }, { $set: { read: true } }, {}, (err, numReplaced) => {
+            SystemNotifications.update({ _id: id }, { $set: { read: true } }, {}, (err, numReplaced) => {
               if (err) {
                 res.status(500).send(err);
               } else if (numReplaced) {
-                Notification.findOne({ _id: id }, (err, notification) => {
+                SystemNotifications.findOne({ _id: id }, (err, notification) => {
                   if (err) {
                     res.status(500).send(err);
                   } else {

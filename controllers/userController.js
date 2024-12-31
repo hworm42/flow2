@@ -1,4 +1,5 @@
 const User = require('../models/User');
+    const UserManagement = require('../models/UserManagement');
 
     const checkRole = (user, requiredRole) => {
       return user.role === requiredRole;
@@ -116,11 +117,11 @@ const User = require('../models/User');
       const user = req.user;
 
       if (checkRole(user, 'Superadmin')) {
-        User.update({ _id: userId }, { $set: { role } }, {}, (err, numReplaced) => {
+        UserManagement.update({ _id: userId }, { $set: { role } }, {}, (err, numReplaced) => {
           if (err) {
             res.status(500).send(err);
           } else if (numReplaced) {
-            User.findOne({ _id: userId }, (err, user) => {
+            UserManagement.findOne({ _id: userId }, (err, user) => {
               if (err) {
                 res.status(500).send(err);
               } else {

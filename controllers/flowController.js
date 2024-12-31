@@ -1,4 +1,5 @@
 const Flow = require('../models/Flow');
+    const FlowReport = require('../models/FlowReport');
 
     const checkRole = (user, requiredRole) => {
       return user.role === requiredRole;
@@ -119,4 +120,29 @@ const Flow = require('../models/Flow');
           res.status(404).send('Flow not found');
         }
       });
+    };
+
+    exports.reportFlow = (req, res) => {
+      const { flowId, reason } = req.body;
+      const user = req.user;
+
+      if (checkRole(user, 'User') || checkRole(user, 'Moderator') || checkRole(user, 'Admin') || checkRole(user, 'Superadmin')) {
+        const newReport = {
+          flowId,
+          reportedBy: user._id,
+          reason,
+          status: 'pending',
+          createdAt: new Date()
+        };
+
+        FlowReport.insert(newReport, (err, newDoc) => {
+          if (err) {
+            res.status(500).send(err);
+          } else {
+            res.status(201).json(newDoc);
+          }
+        });
+      } else {
+        res.status(403).send('Forbidden');
+      }
     };
